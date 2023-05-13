@@ -83,8 +83,8 @@ const dbReservas = [
         cantPersonas: 2,
         precio: 160000,
         nombrePersona: "Luciano Ferrando",
-        fechaEntrada: (new Date("December 26, 2023 14:00:00")).toLocaleDateString(),
-        fechaSalida:(new Date("December 30, 2023 14:00:00")).toLocaleDateString()
+        fechaEntrada: (new Date("December 26, 2023 14:00:00")).toLocaleString(),
+        fechaSalida:(new Date("December 30, 2023 14:00:00")).toLocaleString()
     },
     {
         id: 211367812,
@@ -93,8 +93,8 @@ const dbReservas = [
         cantPersonas: 4,
         precio: 89923,
         nombrePersona: "José Pérez",
-        fechaEntrada: (new Date("March 26, 2024 11:00:00")).toLocaleDateString(),
-        fechaSalida:(new Date("March 30, 2024 14:00:00")).toLocaleDateString()
+        fechaEntrada: (new Date("March 26, 2024 11:00:00")).toLocaleString(),
+        fechaSalida:(new Date("March 30, 2024 14:00:00")).toLocaleString()
     }
 ]
 
