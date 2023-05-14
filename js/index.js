@@ -98,9 +98,17 @@ const dbReservas = [
     }
 ]
 
+const dbPersonas = [
+    {
+        nombre: "Luciano Ferrando",
+        edad: 29,
+        rut: "18621142-1"
+    }
+]
+
 class Reserva{
-    constructor(id, ciudad, hotel, cantPersonas, precio, nombrePersona, fechaEntrada, fechaSalida){
-        this.id = id;
+    constructor(ciudad, hotel, cantPersonas, precio, nombrePersona, fechaEntrada, fechaSalida){
+        this.id = this.generarID();
         this.ciudad = ciudad;
         this.hotel = hotel;
         this.cantPersonas = cantPersonas;
@@ -109,28 +117,38 @@ class Reserva{
         this.fechaEntrada = fechaEntrada;
         this.fechaSalida = fechaSalida;
     }
+    generarID(){ 
+        return Math.random().toString(30).substring(2);           
+    } 
 
 
 }
 
 class Persona{
     constructor(nombre, edad, rut){
+        this.id = this.generarID()
         this.nombre = nombre;
         this.edad = edad;
         this.rut = rut;
     }
-
-
+    generarID(){ 
+        return Math.random().toString(30).substring(2);           
+    } 
 }
-
-
+// Arrays de objetos
 const reservas = []
+const personas = []
 
+// Ingresar objetos de Reserva dentro del array para poblar con datos de prueba
 dbReservas.map((dbReserva) => {
     let reserva = new Reserva(dbReserva.id, dbReserva.ciudad, dbReserva.hotel, dbReserva.cantPersonas, dbReserva.precio, dbReserva.nombrePersona, dbReserva.fechaEntrada, dbReserva.fechaSalida)
     reservas.push(reserva)
 })
-
+// Ingresar objetos de Persona dentro del array para poblar con datos de prueba
+dbPersonas.map(dbPersona => {
+    let persona = new Persona(dbPersona.nombre, dbPersona.edad, dbPersona.rut)
+    personas.push(persona)
+})
 
 let seguir = true;
 
@@ -166,6 +184,46 @@ function calcularTarifaPersonas(){
         }
     }
     return valorPersonas
+}
+
+function crearPersona(){
+    let personaExiste = false
+    let persona;
+    while(!personaExiste){
+        let nombre = prompt("Ingresa tu nombre:")
+        let edad = parseInt(prompt("Ingresa tu edad: "))
+        while(true){
+            if(edad > 1){
+                break
+            }else{
+                alert("La edad que ingresaste no es válida, ingresa nuevamente")
+                edad = parseInt(prompt("Ingresa tu edad: "))
+            }
+        }
+        let rut = prompt("Ingresa tu Rut (sin puntos y con guión) o DNI: ")
+        let per = buscarPersona(rut)
+        if(per){
+            // alert("Persona ya existe")
+            persona = per
+            personaExiste = true
+        }else{
+            // alert("Creando persona")
+            persona = new Persona(nombre, edad, rut)
+            personas.push(persona)
+        }
+    }
+    return persona
+}
+
+function comprarReserva(){
+
+}
+
+// Funciones de búsqueda
+function buscarPersona(rut){
+    let personaExiste = personas.find(persona => persona.rut == rut)
+
+    return personaExiste
 }
 
 
@@ -251,13 +309,14 @@ function initProgram(){
                 verTarifasPersona()
                 break
             case "4":
-                
+                mostrarReservas()
                 break
             case "5":
                 mostarReservaID()
                 break
             case "6":
-
+                let persona = crearPersona()
+                console.log(persona)
                 break
             case "7":
                 seguir = false;
