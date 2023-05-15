@@ -17,14 +17,17 @@
 
 const ciudades = [
     {
+        id: 1,
         nombre: "Tokyo",
         hoteles: [
             {
+                id: 1,
                 nombre: "Sotetsu Fresa Inn Ginza-Nanachome",
                 precio: 85294
 
             },
             {
+                id: 2,
                 nombre: "The Square Hotel GINZA",
                 precio: 117280
             },
@@ -32,27 +35,33 @@ const ciudades = [
         precio: 50000
     },
     {
+        id: 2,
         nombre: "Kyoto",
         hoteles: [
             {
+                id: 1,
                 nombre: "Hotel Resol Kyoto Kawaramachi Sanjo",
                 precio: 90459
             },
             {
+                id: 2,
                 nombre: "Hotel Resol Trinity Kyoto",
                 precio: 102412
             },
         ],
         precio: 35000
     },
-    {
+    {   
+        id: 3,
         nombre: "Osaka", 
         hoteles: [
             {
+                id: 1,
                 nombre: "Sotetsu Fresa Inn Osaka Namba",
                 precio: 65748
             },
             {
+                id: 2,
                 nombre: "Nest Hotel Osaka Umeda",
                 precio: 58569
             },
@@ -60,13 +69,16 @@ const ciudades = [
         precio: 40000
     },
     {
+        id: 4,
         nombre: "Nara",
         hoteles: [
             {
+                id: 1,
                 nombre: "Nara Royal Hotel",
                 precio: 41403
             },
             {
+                id: 2,
                 nombre: "Hotel Nikko Nara",
                 precio: 60772
             },
@@ -77,7 +89,7 @@ const ciudades = [
 
 const dbReservas = [
     {
-        id: 123670123,
+        id: "b4gkn6isr4i",
         ciudad: "Tokyo",
         hotel: "Sotetsu Fresa Inn Ginza-Nanachome",
         cantPersonas: 2,
@@ -87,7 +99,7 @@ const dbReservas = [
         fechaSalida:(new Date("December 30, 2023 14:00:00")).toLocaleString()
     },
     {
-        id: 211367812,
+        id: "0o6nbin4af0r",
         ciudad: "Osaka",
         hotel: "Nest Hotel Osaka Umeda",
         cantPersonas: 4,
@@ -107,8 +119,8 @@ const dbPersonas = [
 ]
 
 class Reserva{
-    constructor(ciudad, hotel, cantPersonas, precio, nombrePersona, fechaEntrada, fechaSalida){
-        this.id = this.generarID();
+    constructor(id, ciudad, hotel, cantPersonas, precio, nombrePersona, fechaEntrada, fechaSalida){
+        this.id = id;
         this.ciudad = ciudad;
         this.hotel = hotel;
         this.cantPersonas = cantPersonas;
@@ -117,12 +129,14 @@ class Reserva{
         this.fechaEntrada = fechaEntrada;
         this.fechaSalida = fechaSalida;
     }
-    generarID(){ 
-        return Math.random().toString(30).substring(2);           
-    } 
 
 
 }
+
+function generarID(){ 
+    return Math.random().toString(30).substring(2);           
+} 
+
 
 class Persona{
     constructor(nombre, edad, rut){
@@ -142,6 +156,7 @@ const personas = []
 // Ingresar objetos de Reserva dentro del array para poblar con datos de prueba
 dbReservas.map((dbReserva) => {
     let reserva = new Reserva(dbReserva.ciudad, dbReserva.hotel, dbReserva.cantPersonas, dbReserva.precio, dbReserva.nombrePersona, dbReserva.fechaEntrada, dbReserva.fechaSalida)
+    console.log(reserva)
     reservas.push(reserva)
 })
 // Ingresar objetos de Persona dentro del array para poblar con datos de prueba
@@ -165,29 +180,29 @@ let seguir = true;
 
 // Funciones de Cálculo
 function calcularTarifaPersonas(){
-    let opcionValida = false;
+    let opcionValida = true;
     let valorPersonas;
-    while(!opcionValida){
-        let cantPersonas = parseInt(prompt(`Ingrese la cantidad de personas que se alojarán en el Hotel: `))
-        // console.log(cantPersonas)
+
+    let cantPersonas = parseInt(prompt(`Ingrese la cantidad de personas que se alojarán en el Hotel: `))
+    while(opcionValida){
         if(cantPersonas < 1 || cantPersonas == undefined){
             alert("La cantidad de personas no puede ser inferior a 1, inrgese nuevamente")
+            cantPersonas = parseInt(prompt(`Ingrese la cantidad de personas que se alojarán en el Hotel: `))
         }else{
             if(cantPersonas <= 3){
-                valorPersonas = 3500
+                valorPersonas = 3500 * cantPersonas
             }else if(cantPersonas <= 6){
-                valorPersonas = 5500
+                valorPersonas = 5500 * cantPersonas
             }else{
-                valorPersonas = 7000
+                valorPersonas = 7000 * cantPersonas
             }
-            opcionValida = true;
+            opcionValida = false;
         }
     }
-    return valorPersonas
+    return {valorPersonas, cantPersonas}
 }
 
 function crearPersona(){
-    let personaExiste = false
     let edadInvalida = false
     let rutInvalido = false
     let nombreInvalido = false
@@ -232,9 +247,112 @@ function crearPersona(){
     return persona
 }
 
-function comprarReserva(){
+
+function crearReserva(nombrePersona, hotel, ciudad, cantPersonas, tarifaPersona){
+    let precioHotel = hotel.precio
+    let nombreHotel = hotel.nombre
+    let nombreCiudad = ciudad.nombre
+    let precioCiudad = ciudad.precio
+
+    let fechaEntrada = new Date(Date.parse(prompt("Elija la fecha de entrada para su estadía (dd-mm-yyyy hh:mm:ss)")))
+    let fechaSalida = new Date(Date.parse(prompt("Elija la fecha de salida para su estadía (dd-mm-yyyy hh:mm:ss)")))
+
+    let fechaEntradaLocal = fechaEntrada.toLocaleString();
+    let fechaSalidaLocal = fechaSalida.toLocaleString();
+
+    let milisegundosEnDia = 86400000
+
+    let cantidadDias = Math.floor((fechaSalida.getTime() - fechaEntrada.getTime())/milisegundosEnDia)
+    let valorHotelDias = precioHotel * cantidadDias
+    let precioFinal = tarifaPersona + valorHotelDias + precioCiudad
+    let id = generarID()
+
+
+    let nuevaReserva = new Reserva(id, nombreCiudad, nombreHotel, cantPersonas, precioFinal,nombrePersona, fechaEntradaLocal, fechaSalidaLocal)
+
+    alert(` Nueva reserva generada: 
+            Nombre: ${nombrePersona}
+            Hotel: ${nombreHotel}
+            Cantidad de personas"${cantPersonas}
+            Fecha entrada: ${fechaEntradaLocal}
+            Fecha Salida: ${fechaSalidaLocal}
+            Total a pagar: ${precioFinal} 
+            Tu código de reserva es: ${id}
+           `)
+    
+}
+
+function elegirReserva(){
+    let ciudadValida = true;
+    let hotelValido = true;
     let persona = crearPersona()
     console.log(persona)
+    let textoCiudades = "" 
+    for (let ciudad of ciudades) {
+        textoCiudades+= `${ciudad.id}. ${ciudad.nombre}:  $${ciudad.precio}\n`
+    }
+
+    // Encontrar la ciudad a la que se quiere ir y devolverla
+    let ciudad = prompt(`En qué ciudad le gustaría hospedarse?\n${textoCiudades}`)
+    while(ciudadValida){
+        
+        let ciudadEncontrada = ciudades.find( c => {
+            return c.id == ciudad || c.nombre.toUpperCase() == ciudad.toUpperCase()
+        }) 
+        if(ciudadEncontrada){
+            ciudadValida = false
+        }else{
+            alert("Esa ciudad no existe dentro de la lista, elija nuevamente")
+            ciudad = prompt(`En qué ciudad le gustaría hospedarse?\n${textoCiudades}`)
+        }
+    }
+
+    let textoHoteles = "" 
+    for (let hotel of ciudadEncontrada) {
+        textoHoteles+= `${hotel.id}. ${hotel.nombre}:  $${hotel.precio}\n`
+    }
+
+    while(hotelValido){
+        let hotel = prompt(`En qué hotel le gustaría hospedarse?\n${textoHoteles}`)
+        let hotelEncontrado = ciudadEncontrada.hoteles.find( h => {
+            return h.id == hotel || h.nombre.toUpperCase() == hotel.toUpperCase()
+        }) 
+        if(hotelEncontrado){
+            hotelValido = false
+        }else{
+            alert("Ese hotel no existe dentro de la lista, elija nuevamente")
+            hotel = prompt(`En qué hotel le gustaría hospedarse?\n${textoHoteles}`)
+        }
+    }
+
+
+
+
+    let {tarifaPersona, cantPersonas} = calcularTarifaPersonas()
+
+    crearReserva(persona.nombre, hotelEncontrado, ciudadEncontrada, cantPersonas, tarifaPersona)
+
+    
+}
+
+function comprarReserva(){
+    let repetirProceso = true
+    // let seguir = true
+    while(repetirProceso){
+        let opcion = prompt()
+        switch(opcion){
+            case "1":
+                elegirReserva()
+            case "2":
+                repetirProceso = false
+                break
+            default:
+        }
+
+    }
+
+    initProgram()
+
 }
 
 // Funciones de búsqueda
@@ -290,6 +408,7 @@ function mostrarReservas(){
 
 function buscarReservaID(idReserva){
     let reservaEncontrada = reservas.find((reserva) => reserva.id == idReserva)
+    console.log(reservaEncontrada)
     return reservaEncontrada
 }
 
@@ -354,259 +473,3 @@ initProgram();
 
 
 
-
-// let finalizar = false
-
-
-
-// var IVA = 0.19;
-
-// function calcularTotalIVA(total, IVA){
-//     const totalIVA = total*(1+IVA)
-//     console.log("Total sin IVA: " + total)
-//     console.log("Total IVA:" + totalIVA)
-//     return totalIVA
-// }
-
-// function calcularTotal(valorPersonas, valorCiudad, valorHotel){
-//     const valorFinal = valorPersonas + valorCiudad + valorHotel
-//     console.log(valorPersonas, valorCiudad, valorHotel)
-//     console.log("Valor final: " + valorFinal)
-//     return valorFinal
-    
-// }
-
-
-
-// function valorPorCiudad(){
-//     let opcionValida = false;
-//     let valorCiudad;
-//     let ciudad = prompt(`Elija la ciudad en donde quiere hospedarse. Por favor, ingrese el número corresponiente a la ciudad:   
-//     1. Osaka: $40.000
-//     2. Kyoto: $35.000
-//     3. Tokyo: $50.000
-//     4. Nara:  $25.000`)
-//     while(!opcionValida){
-//         if(ciudad == "1"){
-//             ciudad = "Osaka"
-//             valorCiudad = 40000
-//             opcionValida = true
-//         }else if(ciudad == "2"){
-//             ciudad = "Kyoto"
-//             valorCiudad = 35000
-//             opcionValida = true
-//         }else if(ciudad == "3"){
-//             ciudad = "Tokyo"
-//             valorCiudad = 50000
-//             opcionValida = true
-//         }else if(ciudad == "4"){
-//             ciudad = "Nara"
-//             valorCiudad = 25000
-//             opcionValida = true
-//         }else{
-//             alert("Opción inváldia, ingrese nuevamente")
-//             ciudad = prompt(`Elija la ciudad en donde quiere hospedarse. Por favor, ingrese el número corresponiente a la ciudad:   
-//             1. Osaka: $40.000
-//             2. Kyoto: $35.000
-//             3. Tokyo: $50.000
-//             4. Nara:  $25.000`)
-//         }
-       
-        
-//     }
-
-//     return {ciudad, valorCiudad}
-
-
-// }       
-
-
-// // TOKYO
-// // - Sotetsu Fresa Inn Ginza-Nanachome 85.294
-// // - The square hotel GINZA = 117.280
-// // OSAKA
-// // - Sotetsu Fresa Inn Osaka Namba = 65.748
-// // - Nest Hotel Osaka Umeda = 58.569
-// // KYOTO
-// // - Hotel Resol Kyoto Kawaramachi Sanjo = 90.459
-// // - Hotel Resol Trinity Kyoto = 102.412
-// // NARA
-// // - Nara Royal Hotel = 41.403
-// // - Hotel Nikko Nara = 60.772
-
-// function valorPorHotel(ciudad){
-
-//     let hotel;
-//     let valorHotel;
-//     if(ciudad == "Osaka"){
-//         hotel = prompt(`Elija el hotel en donde quiere hospedarse. Por favor, ingrese el número corresponiente hotel:   
-//          1. Sotetsu Fresa Inn Osaka Namba: $65.748
-//          2. Nest Hotel Osaka Umeda: $58.569`)
-
-//         while(hotel != "1" && hotel!= "2" && hotel == null){
-//             alert("Debe inrgesar un número de hotel válido")
-//             hotel = prompt(`Elija el hotel en donde quiere hospedarse. Por favor, ingrese el número corresponiente hotel:   
-//             1. Sotetsu Fresa Inn Osaka Namba: $65.748
-//             2. Nest Hotel Osaka Umeda: $58.569`)
-//         }
-//         if(hotel == "1"){
-//             valorHotel = 65748
-//             hotel ="Sotetsu Fresa Inn Osaka Namba"
-//         }else{
-//             valorHotel = 58569
-//             hotel ="Nest Hotel Osaka Umeda"
-//         }
-//     }else if(ciudad == "Kyoto"){
-//         hotel = prompt(`Elija el hotel en donde quiere hospedarse. Por favor, ingrese el número corresponiente hotel:   
-//         1. Hotel Resol Kyoto Kawaramachi Sanjo: $90.459
-//         2. Hotel Resol Trinity Kyoto: $102.412`)
-
-//         while(hotel != "1" && hotel!= "2" && hotel == null){
-//            alert("Debe inrgesar un número de hotel válido")
-//            hotel = prompt(`Elija el hotel en donde quiere hospedarse. Por favor, ingrese el número corresponiente hotel:   
-//            1. Hotel Resol Kyoto Kawaramachi Sanjo: $90.459
-//            2. Hotel Resol Trinity Kyoto: $102.412`
-//            )
-//         }
-//         if(hotel == "1"){
-//             valorHotel = 90459
-//             hotel ="Hotel Resol Kyoto Kawaramachi Sanjo"
-//         }else{
-//             valorHotel = 102412
-//             hotel ="Hotel Resol Trinity Kyoto"
-//         }
-//     }else if(ciudad == "Tokyo"){
-//         hotel = prompt(`Elija el hotel en donde quiere hospedarse. Por favor, ingrese el número corresponiente hotel:   
-//         1. Sotetsu Fresa Inn Ginza-Nanachome: $85.294
-//         2. The square hotel Ginza: $117.280`)
-//         while(hotel != "1" && hotel!= "2" && hotel == null){
-
-//             alert("Debe inrgesar un número de hotel válido")
-//             hotel = prompt(`Elija el hotel en donde quiere hospedarse. Por favor, ingrese el número corresponiente hotel:   
-//                 1. Sotetsu Fresa Inn Ginza-Nanachome: $85.294
-//                 2. The Square Hotel Ginza: $117.280`)
-//         }
-//         if(hotel == "1"){
-//             valorHotel = 85294
-//             hotel ="Sotetsu Fresa Inn Ginza-Nanachome"
-//         }else{
-//             valorHotel = 117280
-//             hotel ="The Square Hotel Ginza"
-//         }
-//     }else if(ciudad == "Nara"){
-//         hotel = prompt(`Elija el hotel en donde quiere hospedarse. Por favor, ingrese el número corresponiente hotel:   
-//         1. Nara Royal Hotel = $41.403
-//         2. Hotel Nikko Nara = $60.772`)
-//        while(hotel != "1" && hotel!= "2" && hotel == null){
-//            alert("Debe inrgesar un número de hotel válido")
-//            hotel = prompt(`Elija el hotel en donde quiere hospedarse. Por favor, ingrese el número corresponiente hotel:   
-//            1. Nara Royal Hotel = $41.403
-//            2. Hotel Nikko Nara = $60.772`)
-//        }
-
-//        if(hotel == "1"){
-//             valorHotel = 41403
-//             hotel ="Nara Royal Hotel"
-//         }else{
-//             valorHotel = 60772
-//             hotel ="Hotel Nikko Nara"
-//         }
-//     }
-    
-//     return {hotel, valorHotel}
-    
-// }
-
-
-
-
-
-// function valorCantidadPersonas(){
-//     let opcionValida = false;
-//     let valorPersonas;
-//     while(!opcionValida){
-//         let cantPersonas = parseInt(prompt(`Ingrese la cantidad de personas que se alojarán en el Hotel`))
-//         console.log(cantPersonas)
-//         if(cantPersonas < 1 || cantPersonas == undefined){
-//             alert("La cantidad de personas no puede ser inferior a 1, inrgese nuevamente")
-//         }else{
-          
-//             if(cantPersonas <= 3){
-//                 valorPersonas = 3500
-//             }else if(cantPersonas <= 6){
-//                 valorPersonas = 5500
-//             }else{
-//                 valorPersonas = 7000
-//             }
-//             opcionValida = true;
-//         }
-
-//     }
-
-//     return valorPersonas
-// }
-
-
-
-
-
-
-// function reservarHotel(){
-
-        
-//     while (!finalizar) {
-//         let opcion = prompt(`Elige una opción: 
-            
-//         1. Listar precios base por ciudades
-//         2. Listar valores por persona 
-//         3. Reservar hospedaje
-//         4. Salir
-//         `)
-//         switch (opcion) {
-//             case "1":
-//                 alert(`
-//                     1. Osaka: $40.000
-//                     2. Kyoto: $35.000
-//                     3. Tokyo: $50.000
-//                     4. Nara:  $25.000
-//                     5. Atras 
-//                 `)
-//                 break;
-//             case "2":
-//                 alert(`Valores base por cantidad de personas
-//                     1. Entre 1 y 3: $3.500 adicional por persona
-//                     2. Entre 4 y 6: $5.500 adicional por persona
-//                     3. Más de 6: $7.000 adicional por persona
-//                 `)
-//                 break;
-//             case "3":
-//                 const {ciudad, valorCiudad} = valorPorCiudad()
-//                 const {hotel, valorHotel} = valorPorHotel(ciudad)
-//                 const valorPersona = valorCantidadPersonas()
-//                 const valorTotal = calcularTotal(valorPersona, valorCiudad, valorHotel)
-//                 const valorFinal = calcularTotalIVA(valorTotal, IVA)
-//                 alert(`Reserva lograda con éxito.
-//                 Usted ha reservado una habitación en el Hotel ${hotel} de la ciudad de ${ciudad}, por un total de $${Math.round(valorFinal)}`)
-//                 break;
-//             case "4":
-//                 finalizar = true
-//                 break;
-//             default:
-//                 alert("La opción elegida no es válida")
-//                 opcion = prompt(`Elige una opción: 
-//                     1. Listar ciudades
-//                     2. Listar valores por persona 
-//                     3. Reservar hospedaje
-//                     4. Salir
-//                 `)          
-//                 break;
-//         }
-
-//     }
-// }
-
-// alert(`Bienvenidos a hospedajes Nippon
-//        日本のの宿へようこそ`)
-
-
-// reservarHotel();
