@@ -305,32 +305,34 @@ function elegirReserva(){
             alert("Esa ciudad no existe dentro de la lista, elija nuevamente")
             ciudad = prompt(`En qué ciudad le gustaría hospedarse?\n${textoCiudades}`)
         }
-    }
+        let textoHoteles = "" 
+        for (let hotel of ciudadEncontrada.hoteles) {
+            textoHoteles+= `${hotel.id}. ${hotel.nombre}:  $${hotel.precio}\n`
+        }
 
-    let textoHoteles = "" 
-    for (let hotel of ciudadEncontrada) {
-        textoHoteles+= `${hotel.id}. ${hotel.nombre}:  $${hotel.precio}\n`
-    }
+        while(hotelValido){
+            let hotel = prompt(`En qué hotel le gustaría hospedarse?\n${textoHoteles}`)
+            let hotelEncontrado = ciudadEncontrada.hoteles.find( h => {
+                return h.id == hotel || h.nombre.toUpperCase() == hotel.toUpperCase()
+            }) 
+            if(hotelEncontrado){
+                hotelValido = false
+                let {tarifaPersona, cantPersonas} = calcularTarifaPersonas()
 
-    while(hotelValido){
-        let hotel = prompt(`En qué hotel le gustaría hospedarse?\n${textoHoteles}`)
-        let hotelEncontrado = ciudadEncontrada.hoteles.find( h => {
-            return h.id == hotel || h.nombre.toUpperCase() == hotel.toUpperCase()
-        }) 
-        if(hotelEncontrado){
-            hotelValido = false
-        }else{
-            alert("Ese hotel no existe dentro de la lista, elija nuevamente")
-            hotel = prompt(`En qué hotel le gustaría hospedarse?\n${textoHoteles}`)
+                crearReserva(persona.nombre, hotelEncontrado, ciudadEncontrada, cantPersonas, tarifaPersona)
+            }else{
+                alert("Ese hotel no existe dentro de la lista, elija nuevamente")
+                hotel = prompt(`En qué hotel le gustaría hospedarse?\n${textoHoteles}`)
+            }
         }
     }
 
+    
 
 
 
-    let {tarifaPersona, cantPersonas} = calcularTarifaPersonas()
 
-    crearReserva(persona.nombre, hotelEncontrado, ciudadEncontrada, cantPersonas, tarifaPersona)
+    
 
     
 }
@@ -338,8 +340,10 @@ function elegirReserva(){
 function comprarReserva(){
     let repetirProceso = true
     // let seguir = true
+    elegirReserva()
     while(repetirProceso){
-        let opcion = prompt()
+        let opcion = prompt("Desea seguir ")
+        
         switch(opcion){
             case "1":
                 elegirReserva()
