@@ -141,7 +141,7 @@ const personas = []
 
 // Ingresar objetos de Reserva dentro del array para poblar con datos de prueba
 dbReservas.map((dbReserva) => {
-    let reserva = new Reserva(dbReserva.id, dbReserva.ciudad, dbReserva.hotel, dbReserva.cantPersonas, dbReserva.precio, dbReserva.nombrePersona, dbReserva.fechaEntrada, dbReserva.fechaSalida)
+    let reserva = new Reserva(dbReserva.ciudad, dbReserva.hotel, dbReserva.cantPersonas, dbReserva.precio, dbReserva.nombrePersona, dbReserva.fechaEntrada, dbReserva.fechaSalida)
     reservas.push(reserva)
 })
 // Ingresar objetos de Persona dentro del array para poblar con datos de prueba
@@ -188,35 +188,53 @@ function calcularTarifaPersonas(){
 
 function crearPersona(){
     let personaExiste = false
-    let persona;
-    while(!personaExiste){
-        let nombre = prompt("Ingresa tu nombre:")
-        let edad = parseInt(prompt("Ingresa tu edad: "))
-        while(true){
-            if(edad > 1){
-                break
-            }else{
-                alert("La edad que ingresaste no es válida, ingresa nuevamente")
-                edad = parseInt(prompt("Ingresa tu edad: "))
-            }
-        }
-        let rut = prompt("Ingresa tu Rut (sin puntos y con guión) o DNI: ")
-        let per = buscarPersona(rut)
-        if(per){
-            // alert("Persona ya existe")
-            persona = per
-            personaExiste = true
+    let edadInvalida = false
+    let rutInvalido = false
+    let nombreInvalido = false
+    
+    
+    let nombre = prompt("Ingresa tu nombre:")
+    while(!nombreInvalido){
+        if(nombre){
+            nombreInvalido = true
         }else{
-            // alert("Creando persona")
-            persona = new Persona(nombre, edad, rut)
-            personas.push(persona)
+            alert("El nombre es un campo obligatorio")
+            nombre = prompt("Ingresa tu nombre: ")
         }
+    }
+    console.log("Nombre correcto", nombre)
+    let edad = parseInt(prompt("Ingresa tu edad: "))
+    while(!edadInvalida){
+        if(edad > 1 && edad <= 100){
+            edadInvalida = true
+        }else{
+            alert("La edad que ingresaste no es válida, ingresa nuevamente")
+            edad = parseInt(prompt("Ingresa tu edad: "))
+        }
+    }
+    let rut = prompt("Ingresa tu Rut (sin puntos y con guión) o DNI: ")
+    while(!rutInvalido){
+        if(rut){
+            rutInvalido = true
+        }else{
+            alert("El campo es obligatorio")
+            rut = prompt("Ingresa tu Rut (sin puntos y con guión) o DNI: ")
+        }
+    }
+
+
+    let persona = buscarPersona(rut)
+    if(!persona){
+        persona = new Persona(nombre, edad, rut)
+        personas.push(persona)
+        alert("Creando Persona")
     }
     return persona
 }
 
 function comprarReserva(){
-
+    let persona = crearPersona()
+    console.log(persona)
 }
 
 // Funciones de búsqueda
@@ -315,8 +333,7 @@ function initProgram(){
                 mostarReservaID()
                 break
             case "6":
-                let persona = crearPersona()
-                console.log(persona)
+                comprarReserva()
                 break
             case "7":
                 seguir = false;
