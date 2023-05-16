@@ -155,8 +155,8 @@ const personas = []
 
 // Ingresar objetos de Reserva dentro del array para poblar con datos de prueba
 dbReservas.map((dbReserva) => {
-    let reserva = new Reserva(dbReserva.ciudad, dbReserva.hotel, dbReserva.cantPersonas, dbReserva.precio, dbReserva.nombrePersona, dbReserva.fechaEntrada, dbReserva.fechaSalida)
-    console.log(reserva)
+    let reserva = new Reserva(dbReserva.id, dbReserva.ciudad, dbReserva.hotel, dbReserva.cantPersonas, dbReserva.precio, dbReserva.nombrePersona, dbReserva.fechaEntrada, dbReserva.fechaSalida)
+    
     reservas.push(reserva)
 })
 // Ingresar objetos de Persona dentro del array para poblar con datos de prueba
@@ -184,8 +184,9 @@ function calcularTarifaPersonas(){
     let valorPersonas;
 
     let cantPersonas = parseInt(prompt(`Ingrese la cantidad de personas que se alojarán en el Hotel: `))
+    console.log(cantPersonas)
     while(opcionValida){
-        if(cantPersonas < 1 || cantPersonas == undefined){
+        if(cantPersonas < 1 || cantPersonas == undefined || isNaN(cantPersonas)){
             alert("La cantidad de personas no puede ser inferior a 1, inrgese nuevamente")
             cantPersonas = parseInt(prompt(`Ingrese la cantidad de personas que se alojarán en el Hotel: `))
         }else{
@@ -242,7 +243,7 @@ function crearPersona(){
     if(!persona){
         persona = new Persona(nombre, edad, rut)
         personas.push(persona)
-        alert("Creando Persona")
+        console.log("Creando Persona")
     }
     return persona
 }
@@ -254,30 +255,63 @@ function crearReserva(nombrePersona, hotel, ciudad, cantPersonas, tarifaPersona)
     let nombreCiudad = ciudad.nombre
     let precioCiudad = ciudad.precio
 
-    let fechaEntrada = new Date(Date.parse(prompt("Elija la fecha de entrada para su estadía (dd-mm-yyyy hh:mm:ss)")))
-    let fechaSalida = new Date(Date.parse(prompt("Elija la fecha de salida para su estadía (dd-mm-yyyy hh:mm:ss)")))
+    // ENTRADA
+    let fechaEntrada = prompt("Elija la fecha de entrada para su estadía (dd/mm/yyyy)")
+    fechaEntrada = fechaEntrada.split('/')
+    fechaEntrada.forEach( ele => {
+        parseInt(ele)
+    })
 
-    let fechaEntradaLocal = fechaEntrada.toLocaleString();
-    let fechaSalidaLocal = fechaSalida.toLocaleString();
+    let [diaE, mesE, anioE] = fechaEntrada
+  
+    let horaEntrada = prompt("Elige la hora de entrada (hh:mm:ss)")
+    horaEntrada = horaEntrada.split(':')
+    let [horaE, minE, segE] = horaEntrada
 
+    let fechaE = new Date(anioE, mesE-1, diaE, horaE, minE, segE)
+    
+
+    // SALIDA
+    let fechaSalida = prompt("Elija la fecha de salida para su estadía (dd/mm/yyyy)")
+    fechaSalida = fechaSalida.split('/')
+    fechaSalida.forEach( ele => {
+        parseInt(ele)
+    })
+    let [diaS, mesS, anioS] = fechaSalida
+   
+
+    let horaSalida = prompt("Elige la hora de Salida (hh:mm:ss)")
+    horaSalida = horaSalida.split(':')
+    let [horaS, minS, segS] = horaSalida
+
+    let fechaS = new Date(anioS, mesS-1, diaS, horaS, minS, segS)
     let milisegundosEnDia = 86400000
 
-    let cantidadDias = Math.floor((fechaSalida.getTime() - fechaEntrada.getTime())/milisegundosEnDia)
+
+    let cantidadDias = Math.floor((fechaS - fechaE)/milisegundosEnDia)
+
+    fechaE = fechaE.toLocaleString();
+    fechaS = fechaS.toLocaleString();
+    
+
+
     let valorHotelDias = precioHotel * cantidadDias
+
     let precioFinal = tarifaPersona + valorHotelDias + precioCiudad
     let id = generarID()
 
 
-    let nuevaReserva = new Reserva(id, nombreCiudad, nombreHotel, cantPersonas, precioFinal,nombrePersona, fechaEntradaLocal, fechaSalidaLocal)
-
+    let nuevaReserva = new Reserva(id, nombreCiudad, nombreHotel, cantPersonas, precioFinal,nombrePersona, fechaE, fechaS)
+    reservas.push(nuevaReserva)
+  
     alert(` Nueva reserva generada: 
             Nombre: ${nombrePersona}
             Hotel: ${nombreHotel}
-            Cantidad de personas"${cantPersonas}
-            Fecha entrada: ${fechaEntradaLocal}
-            Fecha Salida: ${fechaSalidaLocal}
-            Total a pagar: ${precioFinal} 
-            Tu código de reserva es: ${id}
+            Cantidad de personas: ${cantPersonas}
+            Fecha entrada: ${fechaE}
+            Fecha Salida: ${fechaS}
+            Total a pagar: $${precioFinal} 
+            Tu código de reserva es: ${nuevaReserva.id}
            `)
     
 }
@@ -286,7 +320,7 @@ function elegirReserva(){
     let ciudadValida = true;
     let hotelValido = true;
     let persona = crearPersona()
-    console.log(persona)
+ 
     let textoCiudades = "" 
     for (let ciudad of ciudades) {
         textoCiudades+= `${ciudad.id}. ${ciudad.nombre}:  $${ciudad.precio}\n`
@@ -317,32 +351,23 @@ function elegirReserva(){
             }) 
             if(hotelEncontrado){
                 hotelValido = false
-                let {tarifaPersona, cantPersonas} = calcularTarifaPersonas()
+                let {valorPersonas, cantPersonas} = calcularTarifaPersonas()
 
-                crearReserva(persona.nombre, hotelEncontrado, ciudadEncontrada, cantPersonas, tarifaPersona)
+                crearReserva(persona.nombre, hotelEncontrado, ciudadEncontrada, cantPersonas, valorPersonas)
             }else{
                 alert("Ese hotel no existe dentro de la lista, elija nuevamente")
                 hotel = prompt(`En qué hotel le gustaría hospedarse?\n${textoHoteles}`)
             }
         }
-    }
-
-    
-
-
-
-
-    
-
-    
+    }    
 }
 
 function comprarReserva(){
     let repetirProceso = true
-    // let seguir = true
+   
     elegirReserva()
     while(repetirProceso){
-        let opcion = prompt("Desea seguir ")
+        let opcion = prompt("Desea seguir?:\n1. Si\n2. No")
         
         switch(opcion){
             case "1":
@@ -407,19 +432,38 @@ function verTarifasPersona(){
 }
 
 function mostrarReservas(){
-
+     
+    if(reservas.length < 1){
+        alert("No existen reservas")
+    }else{
+        let nombre = prompt("Indique su nombre para listar sus reservas")
+        let reservasEncontradas = reservas.some( reservaEncontrada => reservaEncontrada.nombrePersona.toUpperCase() == nombre.toUpperCase())
+        if(reservasEncontradas){
+            let textoReservas = ''  
+            for (let reserva of reservas) {
+                if(reserva.nombrePersona.toUpperCase() == nombre.toUpperCase()){
+                    textoReservas+= `Codigo Reserva: ${reserva.id}\nHotel: ${reserva.hotel}\nFecha Entrada: ${reserva.fechaEntrada}\nFecha Salida: ${reserva.fechaSalida}\nPrecio: ${reserva.precio}\n
+                    -------------------------------------------------\n`
+                }
+            }
+            alert(textoReservas)
+        }else{
+            alert(`No existen reservas a nombre de ${nombre}`)
+        }
+    }
 }
 
 function buscarReservaID(idReserva){
-    let reservaEncontrada = reservas.find((reserva) => reserva.id == idReserva)
-    console.log(reservaEncontrada)
+    console.log(idReserva)
+    let reservaEncontrada = reservas.find((reserva) =>  {return reserva.id == idReserva})
     return reservaEncontrada
 }
 
 function mostarReservaID(){
     
-    let id = parseInt(prompt("Ingresa el codigo de tu reserva: "))
-        if(id!=undefined){
+    let id = prompt("Ingresa el codigo de tu reserva: ")
+
+        if(id!=undefined && id != null){
             let reserva = buscarReservaID(id)
             if(reserva==undefined){
                 alert("No existe una reserva con ese id, ingrese nuevamente")
